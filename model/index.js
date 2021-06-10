@@ -1,37 +1,41 @@
-// const fs = require('fs/promises')
+const Contact = require('./schemas');
 // const contacts = require('./contacts.json')
-const db = require("./db");
-const { v4: uuid } = require("uuid");
+// const { ObjectID } = require('mongodb');
+// const db = require('./db');
 
 const listContacts = async () => {
-  return db.get("contacts").value();
+  // console.log(db);
+  return await Contact.find({});
 };
 
-const getContactById = async (contactId) => {
-  const id = String(contactId);
-  return db.get("contacts").find({ id }).value();
+const getContactById = async contactId => {
+  return await Contact.findOne({ _id: contactId });
 };
 
-const removeContact = async (contactId) => {
-  const id = String(contactId);
-  const [record] = db.get("contacts").remove({ id }).write();
-  return record;
+const removeContact = async contactId => {
+  return await Contact.findByIdAndRemove({ _id: contactId });
 };
 
-const addContact = async (body) => {
-  const id = uuid();
-  const record = {
-    id,
-    ...body,
-  };
-  db.get("contacts").push(record).write();
-  return record;
+const addContact = async body => {
+  return await Contact.create(body);
 };
 
 const updateContact = async (contactId, body) => {
-  const id = String(contactId);
-  const record = db.get("contacts").find({ id }).assign(body).value();
-  db.write();
+  const record = await Contact.findByIdAndUpdate(
+    { _id: contactId },
+    { ...body },
+
+    { new: true },
+  );
+  return record;
+};
+
+const updateStatusContact = async (contactId, body) => {
+  const record = await Contact.findByIdAndUpdate(
+    { _id: contactId },
+    { ...body },
+    { new: true },
+  );
   return record;
 };
 
@@ -41,4 +45,5 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 };
